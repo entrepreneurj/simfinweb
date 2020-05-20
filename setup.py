@@ -47,7 +47,7 @@ class PublishCommand(Command):
 
 requires = ['requests',
             'rich']
-version = '0.0.1'
+version = '0.0.1.1'
 
 
 def read(f):

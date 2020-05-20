@@ -7,7 +7,7 @@ import numbers
 import requests
 from rich import print
 
-import config
+API_KEY = ""
 
 API_URL = "https://simfin.com/api/v1/{}"
 
@@ -48,6 +48,12 @@ def get_key_name(key: Any) -> Any:
     else:
         return key
 
+def set_api_key(key: str) -> None:
+    """ Sets API key for API requests
+    """
+
+    API_KEY = key
+
 def get_id_for_ticker(ticker: str) -> APIResponseObject:
     """ Returns an array of APIResponseObject, each with attributes
         providing the `name`, `simId` and `ticker` of a potential match
@@ -56,7 +62,7 @@ def get_id_for_ticker(ticker: str) -> APIResponseObject:
     """
 
     endpoint = "info/find-id/ticker/{}"
-    params = {"api-key": config.API_KEY}
+    params = {"api-key": API_KEY}
     endpoint_url = endpoint.format(ticker)
 
     _response = requests.get(API_URL.format(endpoint_url), params=params)
@@ -93,7 +99,7 @@ def get_available_statements(simfin_id: str) -> APIResponseObject:
     """
 
     endpoint = "companies/id/{}/statements/list"
-    params = {"api-key": config.API_KEY}
+    params = {"api-key": API_KEY}
     endpoint_url = endpoint.format(simfin_id)
 
 
@@ -171,7 +177,7 @@ def get_standardised_financial_statement(simfin_id: str, years: int = 5) -> Dict
         for yr in valid_years:
 
             params = {
-                "api-key": config.API_KEY,
+                "api-key": API_KEY,
                 "stype": fs,
                 "ptype": "Q4" if fs == "bs" else "FY",
                 "fyear": yr
@@ -192,9 +198,4 @@ def get_standardised_financial_statement(simfin_id: str, years: int = 5) -> Dict
 def cli():
     return "WIP"
 
-if __name__ == "__main__":
 
-    _id = 111052
-
-    response = get_standardised_financial_statement(_id)
-    print(response)
