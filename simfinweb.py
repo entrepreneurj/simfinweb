@@ -2,7 +2,7 @@
 """
     simfinweb : A module that interfaces with the SimFin low-level web API
 """
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import numbers
 import requests
 from rich import print
@@ -59,7 +59,7 @@ class API:
 
         self.api_key = key
 
-    def get_id_for_ticker(self, ticker: str) -> APIResponseObject:
+    def get_id_for_ticker(self, ticker: str) -> List[APIResponseObject]:
         """ Returns an array of APIResponseObject, each with attributes
             providing the `name`, `simId` and `ticker` of a potential match
             to the request
@@ -73,7 +73,7 @@ class API:
         _response = requests.get(self.API_URL.format(endpoint_url), params=params)
         return [APIResponseObject(i) for i in _response.json()]
 
-    def get_available_statements(self, simfin_id: str) -> APIResponseObject:
+    def get_available_statements(self, simfin_id: int) -> APIResponseObject:
         """ Returns an APIResponse instance containing information about the
             available financial statements for the company provided
 
@@ -134,7 +134,31 @@ class API:
         return available_statements
 
 
-    def get_standardised_financial_statement(self, simfin_id: str, years: int = 5) -> Dict:
+    def get_financial_ratios (self, simfin_id: int,
+        indicators: Optional[str] = None) -> List[APIResponseObject]:
+
+        """ Returns a list of financial indicators for a specific company
+
+        :param simfin_id: The simId of the specified company
+        :param indicators: A comma-separated string of
+        [indicators](https://simfin.com/data/help/main?topic=api-indicators)
+        """
+
+        endpoint = "companies/id/{}/ratios"
+        endpoint_url = endpoint.format(simfin_id)
+        params = {
+            "api-key": self.api_key,
+            "indicators": indicators
+        }
+        
+        _response = requests.get(self.API_URL.format(endpoint_url),
+                                 params=params)
+        
+        return [APIResponseObject(i) for i in _response.json()]
+
+
+    def get_standardised_financial_statement(self,
+        simfin_id: int, years: int = 5) -> APIResponseObject:
         """ Returns a set of financial statements for a specified company
         """
 
