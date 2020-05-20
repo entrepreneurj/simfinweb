@@ -188,6 +188,10 @@ def get_standardised_financial_statement(simfin_id: str, years: int = 5) -> Dict
             raise Exception("Not Implemented")
             return
 
+
+def cli():
+    retun "WIP"
+
 if __name__ == "__main__":
 
     _id = 111052
