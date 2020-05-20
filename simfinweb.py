@@ -190,7 +190,7 @@ def get_standardised_financial_statement(simfin_id: str, years: int = 5) -> Dict
 
 
 def cli():
-    retun "WIP"
+    return "WIP"
 
 if __name__ == "__main__":
 
