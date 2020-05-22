@@ -4,6 +4,7 @@
 """
 from typing import Dict, Any, List, Optional
 import numbers
+import re
 import requests
 from rich import print
 
@@ -37,12 +38,18 @@ class APIResponseObject(object):
         return {k: getattr(self, k) for k in self.keys}.__repr__()
 
 def get_key_name(key: Any) -> Any:
-    """ If the key provided is a number a valid attribute name
-        is returned as a replacement, otherwise the original
-        key is returned as the valid attribute name
+    """ If the key provided is
+        - a number: a valid attribute name is returned as a replacement
+
+        - a string: a valid attribute name without hyphens is returned as
+        a replacement
+
+        otherwise the original key is returned as the valid attribute name
     """
     if isinstance(key, numbers.Number):
         return "_{}".format(key)
+    elif isinstance(key, str):
+        return re.sub("-", "_", key)
     else:
         return key
 
@@ -56,7 +63,6 @@ class API:
     def __init__(self, key: str) -> None:
         """ Sets API key for API requests
         """
-
         self.api_key = key
 
     def get_id_for_ticker(self, ticker: str) -> List[APIResponseObject]:
@@ -69,6 +75,20 @@ class API:
         endpoint = "info/find-id/ticker/{}"
         params = {"api-key": self.api_key}
         endpoint_url = endpoint.format(ticker)
+
+        _response = requests.get(self.API_URL.format(endpoint_url), params=params)
+        return [APIResponseObject(i) for i in _response.json()]
+
+    def get_id_for_name(self, name: str) -> List[APIResponseObject]:
+        """ Returns an array of APIResponseObject, each with attributes
+            providing the `name`, `simId` and `ticker` of a potential match
+            to the request
+            :param name: The name of a public company
+        """
+
+        endpoint = "info/find-id/name-search/{}"
+        params = {"api-key": self.api_key}
+        endpoint_url = endpoint.format(name)
 
         _response = requests.get(self.API_URL.format(endpoint_url), params=params)
         return [APIResponseObject(i) for i in _response.json()]
@@ -150,10 +170,10 @@ class API:
             "api-key": self.api_key,
             "indicators": indicators
         }
-        
+
         _response = requests.get(self.API_URL.format(endpoint_url),
                                  params=params)
-        
+
         return [APIResponseObject(i) for i in _response.json()]
 
 
