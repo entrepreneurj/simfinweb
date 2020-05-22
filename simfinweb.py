@@ -88,7 +88,8 @@ class API:
 
         endpoint = "info/find-id/name-search/{}"
         params = {"api-key": self.api_key}
-        endpoint_url = endpoint.format(name)
+        escaped_name = requests.utils.quote(name)
+        endpoint_url = endpoint.format(escaped_name)
 
         _response = requests.get(self.API_URL.format(endpoint_url), params=params)
         return [APIResponseObject(i) for i in _response.json()]
