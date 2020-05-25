@@ -185,7 +185,8 @@ class API:
 
 
     def get_standardised_financial_statement(self,
-        simfin_id: int, years: int = 5) -> APIResponseObject:
+        simfin_id: int, years: int = 5,
+        fin_statements_input: Optional[List[str]] = None) -> APIResponseObject:
         """ Returns a set of financial statements for a specified company
         """
 
@@ -228,7 +229,13 @@ class API:
         # Note we need a request for each statement for each year
         # Total requests here = 3 * years
         f_statements = {}
-        for fs in available_statements.keys:
+
+        if fin_statements_input is None:
+            fin_statements_input = available_statements.keys
+
+        ### TODO Should handle fin_statements_input sanitisation here
+
+        for fs in fin_statements_input:
             # iterates over the financial statements
             f_statements[fs] = {"dates":[], "line_items":{}}
             for yr in valid_years:
@@ -241,11 +248,8 @@ class API:
                     }
                 _response = requests.get(self.API_URL.format(endpoint_url),
                                          params=params)
-                print(_response.url)
-                # Need to be careful with the metatprogramming magic here
-                # After all we don't want each individual financial statement
-                # result wrapped in an APIResponseObject instance.
-                # TODO
+
+                # Now we process the response
                 _response_json = _response.json()
                 _date = dateutil.parser.parse(_response_json["periodEndDate"])
                 f_statements[fs]["dates"].append(_date)
