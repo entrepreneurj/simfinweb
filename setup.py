@@ -46,8 +46,9 @@ class PublishCommand(Command):
         sys.exit()
 
 requires = ['requests',
-            'rich']
-version = '0.0.1.1'
+            'rich',
+            'python_dateutil']
+version = '0.0.2'
 
 
 def read(f):
