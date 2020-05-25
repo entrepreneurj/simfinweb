@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7f4308e56538c254c9cb7bb473178205648897209463876afa753a877d2d268b"
+            "sha256": "1c85a4c73b5c86cb835d52d777ae8168897d3760c8bfbc6df20330eadbd34acf"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -65,6 +65,14 @@
             ],
             "version": "==2.6.1"
         },
+        "python-dateutil": {
+            "hashes": [
+                "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c",
+                "sha256:75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a"
+            ],
+            "index": "pypi",
+            "version": "==2.8.1"
+        },
         "requests": {
             "hashes": [
                 "sha256:43999036bfa82904b6af1d99e4882b560e5e2c68e5c4b0aa03b655f3d7d73fee",
@@ -75,11 +83,18 @@
         },
         "rich": {
             "hashes": [
-                "sha256:27ced1842e4388d6a3d8bec3ddd704a43b5650ee769d10e6a5f7d37fdd2aa51d",
-                "sha256:304add6c8893e55930b2eb5e936b31be6f4b171f1cfad3359249bb31fb057a6e"
+                "sha256:00cfae0180e7f38d8d9ac2075b0decd15868210b1092d8a08af87434ff8bfe4b",
+                "sha256:7c9202cbad4ea9bf407a2f74ebc38cdf67c95eca4d19b9d8274b71f508e38ac0"
             ],
             "index": "pypi",
-            "version": "==1.1.9"
+            "version": "==1.2.3"
+        },
+        "six": {
+            "hashes": [
+                "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259",
+                "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"
+            ],
+            "version": "==1.15.0"
         },
         "typing-extensions": {
             "hashes": [
@@ -155,10 +170,10 @@
         },
         "six": {
             "hashes": [
-                "sha256:236bdbdce46e6e6a3d61a337c0f8b763ca1e8717c03b369e87a7ec7ce1319c0a",
-                "sha256:8f3cd2e254d8f793e7f3d6d9df77b92252b52637291d0f0da013c76ea2724b6c"
+                "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259",
+                "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"
             ],
-            "version": "==1.14.0"
+            "version": "==1.15.0"
         },
         "toml": {
             "hashes": [

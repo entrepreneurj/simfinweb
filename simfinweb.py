@@ -6,6 +6,7 @@ from typing import Dict, Any, List, Optional
 import numbers
 import re
 import requests
+import dateutil.parser
 from rich import print
 
 
@@ -21,13 +22,17 @@ class APIResponseObject(object):
         self.keys = []
         for k, v in api_response.items():
             key_name = get_key_name(k)
+            print("key", key_name, k, "value", v)
             self.keys.append(key_name)
             if isinstance(v, dict):
                 setattr(self, key_name, APIResponseObject(v))
             elif isinstance(v, list):
                 _arr = []
                 for member in v:
-                    _arr.append(APIResponseObject(member))
+                    if isinstance(member, dict):
+                        _arr.append(APIResponseObject(member))
+                    else:
+                        _arr.append(member)
 
                 setattr(self, key_name, _arr)
 
@@ -49,7 +54,9 @@ def get_key_name(key: Any) -> Any:
     if isinstance(key, numbers.Number):
         return "_{}".format(key)
     elif isinstance(key, str):
-        return re.sub("-", "_", key)
+        sub1 = re.sub(" ", "_", key)
+        sub2 = re.sub("[-\:\.\&\(\)\,]", "_", sub1)
+        return sub2
     else:
         return key
 
@@ -183,7 +190,7 @@ class API:
         """ Returns a set of financial statements for a specified company
         """
 
-        endpoint = "companies/id/{}/statements/original"
+        endpoint = "companies/id/{}/statements/standardised"
         endpoint_url = endpoint.format(simfin_id)
 
         available_statements = self.get_available_statements(simfin_id)
@@ -221,9 +228,10 @@ class API:
         # Now we download the financial statements
         # Note we need a request for each statement for each year
         # Total requests here = 3 * years
+        f_statements = {}
         for fs in available_statements.keys:
             # iterates over the financial statements
-
+            f_statements[fs] = {"dates":[], "line_items":{}}
             for yr in valid_years:
 
                 params = {
@@ -234,15 +242,102 @@ class API:
                     }
                 _response = requests.get(self.API_URL.format(endpoint_url),
                                          params=params)
-
+                print(_response.url)
                 # Need to be careful with the metatprogramming magic here
                 # After all we don't want each individual financial statement
                 # result wrapped in an APIResponseObject instance.
                 # TODO
+                _response_json = _response.json()
+                _date = dateutil.parser.parse(_response_json["periodEndDate"])
+                f_statements[fs]["dates"].append(_date)
+                for line in _response_json["values"]:
+                    print(line)
+                    title = line["standardisedName"]
+                    uid = line["uid"]
+                    parent_tid = line["parent_tid"]
+                    tid = line["tid"]
+                    value_calculated = line["valueCalculated"]
+                    value_chosen = line["valueChosen"]
+                    value_assigned = line["valueAssigned"]
+                    display_level = line["displayLevel"]
+                    if title not in f_statements[fs]["line_items"]:
 
-                # TODO finish this function
-                raise Exception("Not Implemented")
-                return
+                        f_statements[fs]["line_items"][title] = {
+                            "uid": uid, "title": title,
+                            "parent_tid": parent_tid, "tid": tid,
+                            "display_level": display_level, "values":[]}
+
+                    f_statements[fs]["line_items"][title]["values"].append({
+                        "value_calculated": value_calculated if \
+                            value_calculated else None,
+                        "value_chosen": value_chosen if value_chosen else None,
+                        "value_assigned": int(value_assigned) if \
+                            value_assigned else None,
+                        "date": _date}
+                            )
+
+
+        return APIResponseObject(f_statements)
+
+
+    def get_aggregated_shares_outstanding(self, simId: int,
+            _filter: Optional[str]=None) -> APIResponseObject:
+        """ Returns an APIResponseObject contining aggregated shares
+            outstanding information, organised by figure, measure and
+            type.
+
+        """
+        endpoint = "companies/id/{}/shares/aggregated"
+        endpoint_url = endpoint.format(simId)
+
+        params = {"api-key": self.api_key,
+                  "filter": _filter
+                  }
+
+        _response = requests.get(self.API_URL.format(endpoint_url), params=params)
+        items = {}
+        for item in _response.json():
+            figure = item["figure"]
+            measure = get_key_name(item["measure"])
+            period = item["period"]
+            fyear = item["fyear"]
+            date = dateutil.parser.parse(item["date"])
+            value = item["value"]
+            _type = item["type"]
+
+            if figure not in items:
+                items[figure] = {}
+
+
+            if measure not in items[figure]:
+                items[figure][measure] = {}
+
+            if measure == "period":
+
+                if _type not in items[figure][measure]:
+                    items[figure][measure][_type] = {}
+
+                if period not in items[figure][measure][_type]:
+                    items[figure][measure][_type][period] = []
+
+                items[figure][measure][_type][period].append( {
+                    "value": value,
+                    "date": date,
+                    "fyear": int(fyear) if fyear else None})
+                ## TODO sort by fyear    items[figure][measure][_type][period].sort()
+
+            else:
+                ## point_in_time
+
+                if _type not in items[figure][measure]:
+                    items[figure][measure][_type] = []
+
+                items[figure][measure][_type].append( {"value": value,
+                                                       "date": date,
+                                                       "fyear": int(fyear) \
+                                                       if fyear else None})
+
+        return APIResponseObject(items)
 
 
 def cli():
