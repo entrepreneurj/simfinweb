@@ -22,7 +22,6 @@ class APIResponseObject(object):
         self.keys = []
         for k, v in api_response.items():
             key_name = get_key_name(k)
-            print("key", key_name, k, "value", v)
             self.keys.append(key_name)
             if isinstance(v, dict):
                 setattr(self, key_name, APIResponseObject(v))
